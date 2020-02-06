@@ -41,7 +41,11 @@ Some elements are not transformed correctly for various reasons and will need ma
 
 ### Development
 
-Scalagen development instructions are here https://github.com/mysema/scalagen/wiki/Scalagen-development
+After cloning this repo, you can build a local version of this tool using SBT:
+```
+sbt compile
+```
+After this, the `scalagen/scalagen` shell script should pick up the compiled code and can be used to transform code from the command line. 
 
 #### Building
 
