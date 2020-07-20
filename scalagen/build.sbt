@@ -23,5 +23,7 @@ libraryDependencies ++= Seq(
   "com.jsuereth" %% "scala-arm" % "2.0" % Test
 )
 
+compileOrder in Test := CompileOrder.JavaThenScala
+
 //fork in test := true
 //baseDirectory in test := baseDirectory(_ / "scalagen").value
