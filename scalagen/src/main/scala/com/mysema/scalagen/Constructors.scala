@@ -46,6 +46,9 @@ class Constructors extends UnitTransformerBase {
     // move in front of others
     first.filter(_ != constr(0)).foreach { c =>
       t.getMembers.remove(c)
+      if (!t.hasComment && c.hasComment) t.setComment(c.getComment)
+      // TODO: should we merge the constructor comment with the class comment?
+      c.setComment(null)
       t.getMembers.add(t.getMembers.indexOf(constr(0)), c)
     }
 
