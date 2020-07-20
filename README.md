@@ -1,5 +1,5 @@
 ## Scalagen
-[![Actions Status](https://github.com/scalagen/scalagen/workflows/build/badge.svg)](https://github.com/scalagen/scalagen/actions)
+[![Actions Status](https://github.com/scalagen/scalagen/workflows/Scala%20CI/badge.svg)](https://github.com/scalagen/scalagen/actions)
 **Java to Scala conversion**
 
 Scalagen is a Java to Scala conversion tool. It uses a Java based parser for Java sources and provides modular 
