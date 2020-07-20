@@ -7,12 +7,12 @@ import java.io.File
 
 object CompileTestUtils {
   import java.io.File.pathSeparator
-
+  
   val currentLibraries = (this.getClass.getClassLoader).asInstanceOf[java.net.URLClassLoader].getURLs().toList
-  val cp = (jarPathOfClass("scala.tools.nsc.Interpreter") ::
-    //scala.ScalaObject was a marker trait used up to 2.10
-    (if (ScalaVersion.current <= Scala210) jarPathOfClass("scala.ScalaObject") else "") :: 
-    currentLibraries)
+  val compilerPath = jarPathOfClass("scala.tools.nsc.Interpreter")
+  val libraryPath = jarPathOfClass("scala.Some")
+
+  val cp = currentLibraries :+ compilerPath :+ libraryPath
   val cpString = cp.mkString(pathSeparator)
      
   private def jarPathOfClass(className: String) = {
@@ -22,6 +22,7 @@ object CompileTestUtils {
 
 trait CompileTestUtils {
   import CompileTestUtils._ 
+  import java.io.File.pathSeparator
 
   def assertCompileSuccess(files: Traversable[File]): Unit = {
     assertCompileSuccess(files
@@ -34,7 +35,7 @@ trait CompileTestUtils {
     val interpreterWriter = new java.io.PrintWriter(out)
     
     val untransformedEnv = new Settings()
-    untransformedEnv.classpath.value = cpString
+    untransformedEnv.bootclasspath.value = List(untransformedEnv.bootclasspath.value, cpString).mkString(pathSeparator)
     val env = settingsTransformation(untransformedEnv)
     // The next line causes a problem like this "class StringContext does not have a member f"
     // env.usejavacp.value = true

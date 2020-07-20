@@ -13,15 +13,11 @@
  */
 package com.mysema.scalagen 
 
-import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body._
 import com.github.javaparser.ast.expr._
 import com.github.javaparser.ast.stmt._
 import com.github.javaparser.ast.`type`._
-import com.github.javaparser.ast.visitor.ModifierVisitorAdapter
-import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.ImportDeclaration
-import java.util.ArrayList
 
 object Types extends Types
 

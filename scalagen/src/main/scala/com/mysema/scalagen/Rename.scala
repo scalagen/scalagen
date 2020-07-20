@@ -13,8 +13,6 @@
  */
 package com.mysema.scalagen
 
-import com.github.javaparser.ast.body.ModifierSet
-import java.util.ArrayList
 import UnitTransformer._
 
 class RenameTransformer(replacements: Map[String, String]) extends UnitTransformerBase {

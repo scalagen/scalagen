@@ -13,11 +13,8 @@
  */
 package com.mysema.scalagen
 
-import com.github.javaparser.ast.visitor._
-import java.util.ArrayList
 import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.expr.NameExpr
-import com.github.javaparser.ast.visitor.ModifierVisitorAdapter
 import UnitTransformer._
 
 /**
@@ -34,11 +31,7 @@ class Annotations(targetVersion: ScalaVersion) extends UnitTransformerBase {
     
   override def visit(n: AnnotationDecl, arg: CompilationUnit) = {
     // turns annotations into StaticAnnotation subclasses
-    if (targetVersion >= Scala210) {
-      //StaticAnnotation was in the "scala" package in 2.9, so it was imported by default
-      //in scala 2.10+, it was moved to the scala.annotation package, so we need an explicit import
-      arg.getImports().add(new ImportDeclaration(new NameExpr("scala.annotation.StaticAnnotation"), false, false))
-    }
+    arg.getImports().add(new ImportDeclaration(new NameExpr("scala.annotation.StaticAnnotation"), false, false))
     val clazz = new ClassOrInterfaceDecl()
     clazz.setName(n.getName)    
     clazz.setExtends(staticAnnotationType :: Nil)
@@ -48,7 +41,8 @@ class Annotations(targetVersion: ScalaVersion) extends UnitTransformerBase {
   
   private def createMembers(n: AnnotationDecl): JavaList[BodyDecl] = {
     // TODO : default values
-    val params = n.getMembers.collect { case m: AnnotationMember => m }
+    val params = n.getMembers
+      .collect { case m: AnnotationMember => m }
       .map(m => new Parameter(PROPERTY, m.getType, new VariableDeclaratorId(m.getName)))
       
     if (!params.isEmpty) {

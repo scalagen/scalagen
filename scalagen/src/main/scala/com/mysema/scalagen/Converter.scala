@@ -43,11 +43,24 @@ object Converter {
    * Converter targeting scala 2.11
    */
   lazy val instance211 = createConverter(Scala211)
-  
+
+  /**
+   * Converter targeting scala 2.12
+   */
+  lazy val instance212 = createConverter(Scala212)
+
+  /**
+   * Converter targeting scala 2.13
+   */
+  lazy val instance213 = createConverter(Scala213)
+
+
   def getInstance(version: ScalaVersion) = version match {
     case Scala29 => instance29
     case Scala210 => instance210
     case Scala211 => instance211
+    case Scala212 => instance212
+    case Scala213 => instance213
   }
   
   /**
