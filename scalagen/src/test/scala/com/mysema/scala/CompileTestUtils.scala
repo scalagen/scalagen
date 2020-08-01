@@ -1,21 +1,22 @@
 package com.mysema.scala
 
-import com.mysema.scalagen.{ Scala210, ScalaVersion }
-import scala.tools.nsc._
+import scala.tools.nsc.interpreter.IMain
 import scala.io.Source.fromFile
 import java.io.File
+import java.net.URL
+import scala.tools.nsc.Settings
 
 object CompileTestUtils {
   import java.io.File.pathSeparator
   
-  val currentLibraries = (this.getClass.getClassLoader).asInstanceOf[java.net.URLClassLoader].getURLs().toList
+  val currentLibraries = this.getClass.getClassLoader.asInstanceOf[java.net.URLClassLoader].getURLs().toList
   val compilerPath = jarPathOfClass("scala.tools.nsc.Interpreter")
   val libraryPath = jarPathOfClass("scala.Some")
 
   val cp = currentLibraries :+ compilerPath :+ libraryPath
   val cpString = cp.mkString(pathSeparator)
      
-  private def jarPathOfClass(className: String) = {
+  private def jarPathOfClass(className: String): URL = {
     Class.forName(className).getProtectionDomain.getCodeSource.getLocation    
   }
 }
@@ -26,8 +27,8 @@ trait CompileTestUtils {
 
   def assertCompileSuccess(files: Traversable[File]): Unit = {
     assertCompileSuccess(files
-                           map (fromFile(_).mkString)
-                           mkString ("\n"))
+                           .map(fromFile(_).mkString)
+                           .mkString("\n"))
   }
   
   def assertCompileSuccess(source: String, settingsTransformation: Settings => Settings = identity): Unit = {
@@ -40,7 +41,7 @@ trait CompileTestUtils {
     // The next line causes a problem like this "class StringContext does not have a member f"
     // env.usejavacp.value = true
 
-    val interpreter = new Interpreter(env, interpreterWriter)
+    val interpreter = new IMain(env, interpreterWriter)
     try {
       val result = interpreter.interpret(source.replaceAll("package ", "import "))
       //we have to compare as a string because of an incompatibility between 2.9 and 2.10:

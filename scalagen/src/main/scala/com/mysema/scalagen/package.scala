@@ -13,33 +13,34 @@
  */
 package com.mysema
 
-import _root_.scala.collection.{JavaConversions, Set}
+import _root_.scala.collection.{JavaConverters, Set}
+import _root_.scala.language.implicitConversions
 
 /**
  * scalagen provides common functionality for this package
  */
 package object scalagen {
-  
+
   type JavaCollection[T] = java.util.Collection[T]
   
   type JavaList[T] = java.util.List[T]
   
   type JavaSet[T] = java.util.Set[T]
   
-  implicit def toJavaList[T](col: Seq[T]): JavaList[T] = JavaConversions.seqAsJavaList(col) 
+  implicit def toJavaList[T](col: Seq[T]): JavaList[T] = JavaConverters.seqAsJavaList(col)
   
-  implicit def toJavaSet[T](col: Set[T]): JavaSet[T] = JavaConversions.setAsJavaSet(col)
+  implicit def toJavaSet[T](col: Set[T]): JavaSet[T] = JavaConverters.setAsJavaSet(col)
       
 //  implicit def toScalaSeq[T](col: JavaList[T]): Seq[T] = {
-//    if (col != null) JavaConversions.asScalaBuffer(col) else Nil 
+//    if (col != null) JavaConverters.asScalaBuffer(col) else Nil
 //  }
   
   implicit def toScalaList[T](col: JavaList[T]): List[T] = {
-    if (col != null) JavaConversions.asScalaBuffer(col).toList else Nil 
+    if (col != null) JavaConverters.asScalaBuffer(col).toList else Nil
   }
   
   implicit def toScalaSet[T](col: JavaSet[T]): Set[T] = {
-    if (col != null) JavaConversions.asScalaSet(col) else Set[T]()
+    if (col != null) JavaConverters.asScalaSet(col) else Set[T]()
   }
     
 }

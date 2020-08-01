@@ -21,6 +21,8 @@ import java.util.ArrayList
  * Common helper methods for transformers and ScalaDumpVisitor
  */
 trait Helpers {
+  import scala.language.implicitConversions
+  import scala.language.reflectiveCalls
   import Types._
   
   val PRIVATE = Modifier.PRIVATE
