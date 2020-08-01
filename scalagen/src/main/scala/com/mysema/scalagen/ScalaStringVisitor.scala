@@ -758,9 +758,21 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
             }
           case _ =>
         }
+
+        val isArrayType: Boolean = n.getType match  {
+          //case t: ClassOrInterfaceType => t.getName == "Array"
+          case t: ReferenceType if t.getArrayCount > 0 => true
+          case _ =>  false
+        }
+
         v.getId.accept(this, arg) + ": " +
           "Array[" * v.getId.getArrayCount + n.getType.accept(this, arg) + "]" * v.getId.getArrayCount +
-          Option(v.getInit).map(" = " + _.accept(this, arg)).getOrElse("")
+          Option(v.getInit).map {
+            // Ensure a varargs seq (or any other referenced NameExpr) is converted to an array
+            case nameExpr: NameExpr => " = " + nameExpr.accept(this, arg) +
+                (if (isArrayType) ".toArray" else "")
+            case other: Expression => " = " + other.accept(this, arg)
+          }.getOrElse("")
       }
       annotationsString(n.getAnnotations, arg) +
         (if (!asParameter) valVarString else "") +
