@@ -13,15 +13,15 @@
  */
 package com.mysema.scalagen
 
-import org.junit.Test
-import org.junit.Assert._
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.comments.{BlockComment, JavadocComment, LineComment}
 import com.github.javaparser.ast.visitor.TreeVisitor
 import com.mysema.examples._
+import org.junit.Assert._
+import org.junit.Test
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect._
-import scala.collection.JavaConverters._
 
 class SerializationTest extends AbstractParserTest {
   private def normalizeString(str: String) = str.replaceAll("\\s+", "")

@@ -13,14 +13,9 @@
  */
 package com.mysema.scalagen
 
-import org.junit.Assert.assertEquals
-import com.github.javaparser.ParseException
-import com.github.javaparser.ast.CompilationUnit
-import com.github.javaparser.ast.body.BodyDeclaration
-import com.github.javaparser.ast.body.FieldDeclaration
-import java.io.FileNotFoundException
-import org.junit.Test
 import com.mysema.examples._
+import org.junit.Assert.assertEquals
+import org.junit.Test
 
 class BeanPropertiesTest extends AbstractParserTest {
 

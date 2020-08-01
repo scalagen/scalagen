@@ -13,13 +13,10 @@
  */
 package com.mysema.scalagen
 
-import org.junit.Assert._
-import java.io.FileNotFoundException
-import com.github.javaparser.ParseException
-import com.github.javaparser.ast.CompilationUnit
-import org.junit.Test
 import com.mysema.examples._
-import UnitTransformer._
+import com.mysema.scalagen.UnitTransformer._
+import org.junit.Assert._
+import org.junit.Test
 
 class CompanionObjectTest extends AbstractParserTest {
 

@@ -13,21 +13,17 @@
  */
 package com.mysema.scalagen 
 
-import com.github.javaparser.ast.expr._
 import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.ast.expr._
 
 object UnitTransformer extends Helpers with Types {
+  import scala.language.implicitConversions
   
-  @inline
-  implicit def toNameExpr(s: String) = new NameExpr(s)
+  @inline implicit def toNameExpr(s: String) = new NameExpr(s)
+  @inline implicit def toVariableDeclaratorId(s: String) = new VariableDeclaratorId(s)
+  @inline implicit def toBlock(s: Statement) = new Block(s :: Nil)
   
-  @inline
-  implicit def toVariableDeclaratorId(s: String) = new VariableDeclaratorId(s)
-  
-  @inline 
-  implicit def toBlock(s: Statement) = new Block(s :: Nil)
-  
-  private def safeToString(obj: AnyRef): String = if (obj != null) obj.toString else null
+  //private def safeToString(obj: AnyRef): String = if (obj != null) obj.toString else null
             
   //val BOOLEAN_BEAN_PROPERTY_IMPORT = new Import("scala.reflect.BooleanBeanProperty", false, false)
   

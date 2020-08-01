@@ -13,7 +13,7 @@
  */
 package com.mysema.scalagen
 
-import UnitTransformer._
+import com.mysema.scalagen.UnitTransformer._
 
 class RenameTransformer(replacements: Map[String, String]) extends UnitTransformerBase {
   

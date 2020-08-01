@@ -14,7 +14,7 @@
 package com.mysema.scalagen
 
 import com.github.javaparser.ast.body.ModifierSet
-import UnitTransformer._
+import com.mysema.scalagen.UnitTransformer._
 
 object Enums extends Enums
 

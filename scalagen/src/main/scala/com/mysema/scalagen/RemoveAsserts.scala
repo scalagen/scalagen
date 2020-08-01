@@ -13,8 +13,7 @@
  */
 package com.mysema.scalagen
 
-import java.util.ArrayList
-import UnitTransformer._
+import com.mysema.scalagen.UnitTransformer._
 
 object RemoveAsserts extends RemoveAsserts
 

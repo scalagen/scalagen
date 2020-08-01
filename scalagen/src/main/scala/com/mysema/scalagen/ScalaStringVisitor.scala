@@ -14,19 +14,18 @@
 package com.mysema.scalagen
 
 import com.github.javaparser.ast._
+import com.github.javaparser.ast.`type`._
 import com.github.javaparser.ast.body._
 import com.github.javaparser.ast.comments._
 import com.github.javaparser.ast.expr._
 import com.github.javaparser.ast.stmt._
-import com.github.javaparser.ast.`type`._
 import com.github.javaparser.ast.visitor.{GenericVisitor, GenericVisitorAdapter}
-import java.util.List
-
 import com.mysema.scalagen.Types.MaybeInBlock
-
-import scala.collection.JavaConverters._
-import org.apache.commons.lang3.StringUtils
 import com.mysema.scalagen.ast.BeginClosureExpr
+import java.util.List
+import org.apache.commons.lang3.StringUtils
+import scala.collection.JavaConverters._
+
 object ScalaStringVisitor {
   private val PARAMETRIZED = Set("Class","Comparable","Enum","Iterable")
 
@@ -171,7 +170,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     (commentBefore.toSeq ++ Seq(restText) ++ commentsAfter).mkString("\n")
   }
 
-  def visit(n: CompilationUnit, arg: Context): String = withComments(n, arg) {
+  override def visit(n: CompilationUnit, arg: Context): String = withComments(n, arg) {
     val packageString = Option(n.getPackage).map(_.accept(this, arg)).getOrElse("")
     val importsString = (n.getImports.map(_.accept(this, arg)) ++ Seq(
       "//remove if not needed",
@@ -220,10 +219,10 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     (str.substring(0,separator), str.substring(separator+1))
   }
 
-  def visit(n: PackageDeclaration, arg: Context): String =
+  override def visit(n: PackageDeclaration, arg: Context): String =
     s"package ${if (!isEmpty(n.getAnnotations)) split(n.getName)._1 else n.getName.accept(this, arg)}\n\n"
 
-  def visit(n: NameExpr, arg: Context): String = visitName(n.getName)
+  override def visit(n: NameExpr, arg: Context): String = visitName(n.getName)
 
   def visitName(name: String): String =
     if (RESERVED.contains(name)) {
@@ -234,10 +233,10 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
       name
     }
 
-  def visit(n: QualifiedNameExpr, arg: Context): String =
+  override def visit(n: QualifiedNameExpr, arg: Context): String =
     s"${n.getQualifier.accept(this, arg)}.${visitName(n.getName)}"
 
-  def visit(n: ImportDeclaration, arg: Context): String = withComments(n, arg) {
+  override def visit(n: ImportDeclaration, arg: Context): String = withComments(n, arg) {
     val toImport = if (n.getName.getName.endsWith(".Array") && !n.isAsterisk) {
       val className = n.getName.getName
       val pkg = className.substring(0, className.lastIndexOf('.'))
@@ -249,7 +248,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     s"import $toImport\n"
   }
 
-  def visit(n: ClassOrInterfaceDeclaration, arg: Context): String =
+  override def visit(n: ClassOrInterfaceDeclaration, arg: Context): String =
     withJavaDoc(n, arg) {
       withMemberAnnotations(n, arg) {
         val objectType = if (n.getModifiers.isObject) {
@@ -300,14 +299,14 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     members.collectFirst({ case c: ConstructorDeclaration => c })
   }
 
-  def visit(n: EmptyTypeDeclaration, arg: Context): String = javadocString(n.getJavaDoc, arg)
+  override def visit(n: EmptyTypeDeclaration, arg: Context): String = javadocString(n.getJavaDoc, arg)
 
-  def visit(n: JavadocComment, arg: Context): String = withComments(n, arg) {
+  override def visit(n: JavadocComment, arg: Context): String = withComments(n, arg) {
     val comment = StringUtils.split(n.getContent.trim, '\n').map(" " + _.trim).mkString("\n")
     s"/**\n$comment\n */"
   }
 
-  def visit(n: ClassOrInterfaceType, arg: Context): String = withComments(n, arg) {
+  override def visit(n: ClassOrInterfaceType, arg: Context): String = withComments(n, arg) {
     val scopeString = if (n.getScope != null) {
       n.getScope.accept(this, arg) + "."
     } else if (!arg.classOf && !arg.typeArg && PRIMITIVES.contains(n.getName)) {
@@ -341,22 +340,22 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     ).mkString
   }
 
-  def visit(n: TypeParameter, arg: Context): String = withComments(n, arg) {
+  override def visit(n: TypeParameter, arg: Context): String = withComments(n, arg) {
     n.getName + (if (n.getTypeBound != null && n.getTypeBound.size() > 0) {
       " <: " + n.getTypeBound.map(_.accept(this, arg)).mkString(" with ")
     } else "")
   }
 
-  def visit(n: PrimitiveType, arg: Context): String = n.getType.name
+  override def visit(n: PrimitiveType, arg: Context): String = n.getType.name
 
-  def visit(n: ReferenceType, arg: Context): String = withComments(n, arg) {
+  override def visit(n: ReferenceType, arg: Context): String = withComments(n, arg) {
     val adaptedArg = if(n.getArrayCount > 0) arg.copy(typeArg = true) else arg
     val prefix = "Array[" * n.getArrayCount
     val postFix = "]" * n.getArrayCount
     s"$prefix${n.getType.accept(this, adaptedArg)}$postFix"
   }
 
-  def visit(n: WildcardType, arg: Context): String = withComments(n, arg) {
+  override def visit(n: WildcardType, arg: Context): String = withComments(n, arg) {
     val maybeExtends = Option(n.getExtends).map { ext =>
       s"<: ${ext.accept(this, arg)}"
     }
@@ -366,7 +365,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     Seq(Some("_"), maybeExtends, maybeSuper).flatten.mkString(" ")
   }
 
-  def visit(n: FieldDeclaration, arg: Context): String = {
+  override def visit(n: FieldDeclaration, arg: Context): String = {
     val argWithType = arg.copy(assignType = n.getType)
     withJavaDoc(n, argWithType) {
       withComments(n, arg) {
@@ -391,28 +390,28 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     }
   }
 
-  def visit(n: VariableDeclarator, arg: Context): String = withComments(n, arg) {
+  override def visit(n: VariableDeclarator, arg: Context): String = withComments(n, arg) {
     n.getId.accept(this, arg) + Option(n.getInit).map(" = " + _.accept(this, arg)).getOrElse("")
   }
 
-  def visit(n: VariableDeclaratorId, arg: Context): String = withComments(n, arg) {
+  override def visit(n: VariableDeclaratorId, arg: Context): String = withComments(n, arg) {
     visitName(n.getName)
   }
 
-  def visit(n: ArrayInitializerExpr, arg: Context): String = withComments(n, arg) {
+  override def visit(n: ArrayInitializerExpr, arg: Context): String = withComments(n, arg) {
     val values = Option(n.getValues).toList.flatMap(_.map(_.accept(this, arg))).mkString(", ")
     s"Array($values)"
   }
 
-  def visit(n: VoidType, arg: Context): String = "Unit"
+  override def visit(n: VoidType, arg: Context): String = "Unit"
 
-  def visit(n: ArrayAccessExpr, arg: Context): String = withComments(n, arg) {
+  override def visit(n: ArrayAccessExpr, arg: Context): String = withComments(n, arg) {
     val name = n.getName.accept(this, arg.copy(arrayAccess = true))
     val index = n.getIndex.accept(this, arg)
     s"$name($index)"
   }
 
-  def visit(n: ArrayCreationExpr, arg: Context): String = withComments(n, arg) {
+  override def visit(n: ArrayCreationExpr, arg: Context): String = withComments(n, arg) {
     if (n.getDimensions != null && !n.getDimensions.isEmpty) {
       val withoutArguments = if (arg.assignType != null) {
         s"new ${arg.assignType.accept(this, arg)}"
@@ -429,8 +428,8 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     }
   }
 
-  def visit(n: AssignExpr, arg: Context): String = withComments(n, arg) {
-    import AssignExpr.{ Operator => Op }
+  override def visit(n: AssignExpr, arg: Context): String = withComments(n, arg) {
+    import AssignExpr.{Operator => Op}
     val symbol = n.getOperator match {
       case Op.assign => "="
       case Op.and => "&="
@@ -448,8 +447,8 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     s"${n.getTarget.accept(this, arg)} $symbol ${n.getValue.accept(this, arg)}"
   }
 
-  def visit(n: BinaryExpr, arg: Context): String = withComments(n, arg) {
-    import BinaryExpr.{ Operator => Op }
+  override def visit(n: BinaryExpr, arg: Context): String = withComments(n, arg) {
+    import BinaryExpr.{Operator => Op}
     val symbol = n.getOperator match {
       case Op.or => "||"
       case Op.and => "&&"
@@ -477,7 +476,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     } else "") + n.getRight.accept(this, arg)
   }
 
-  def visit(n: CastExpr, arg: Context): String = withComments(n, arg) {
+  override def visit(n: CastExpr, arg: Context): String = withComments(n, arg) {
     n.getExpr.accept(this, arg) + (
     if (n.getType.isInstanceOf[PrimitiveType]) {
       s".to${n.getType.accept(this, arg)}"
@@ -486,13 +485,13 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     })
   }
 
-  def visit(n: ClassExpr, arg: Context): String = s"classOf[${n.getType.accept(this, arg.copy(classOf = true))}]"
+  override def visit(n: ClassExpr, arg: Context): String = s"classOf[${n.getType.accept(this, arg.copy(classOf = true))}]"
 
-  def visit(n: ConditionalExpr, arg: Context): String = withComments(n, arg) {
+  override def visit(n: ConditionalExpr, arg: Context): String = withComments(n, arg) {
     s"if (${n.getCondition.accept(this, arg)}) ${n.getThenExpr.accept(this, arg.copy(mustWrap = true))} else ${n.getElseExpr.accept(this, arg.copy(mustWrap = true))}"
   }
 
-  def visit(n: EnclosedExpr, arg: Context): String = withComments(n, arg) {
+  override def visit(n: EnclosedExpr, arg: Context): String = withComments(n, arg) {
     if (n.getInner.isInstanceOf[CastExpr]) {
       n.getInner.accept(this, arg)
     } else {
@@ -500,21 +499,21 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     }
   }
 
-  def visit(n: FieldAccessExpr, arg: Context): String = withComments(n, arg) {
+  override def visit(n: FieldAccessExpr, arg: Context): String = withComments(n, arg) {
     s"${n.getScope.accept(this, arg)}.${visitName(n.getField)}"
   }
 
-  def visit(n: InstanceOfExpr, arg: Context): String = withComments(n, arg) {
+  override def visit(n: InstanceOfExpr, arg: Context): String = withComments(n, arg) {
     s"${n.getExpr.accept(this, arg)}.isInstanceOf[${n.getType.accept(this, arg)}]"
   }
 
-  def visit(n: CharLiteralExpr, arg: Context): String = s"'${n.getValue}'"
+  override def visit(n: CharLiteralExpr, arg: Context): String = s"'${n.getValue}'"
 
-  def visit(n: DoubleLiteralExpr, arg: Context): String = removeUnderscores(n.getValue)
+  override def visit(n: DoubleLiteralExpr, arg: Context): String = removeUnderscores(n.getValue)
 
-  def visit(n: IntegerLiteralExpr, arg: Context): String = numberValue(n.getValue, "Integer.parseInt")
+  override def visit(n: IntegerLiteralExpr, arg: Context): String = numberValue(n.getValue, "Integer.parseInt")
 
-  def visit(n: LongLiteralExpr, arg: Context): String = numberValue(n.getValue, "java.lang.Long.parseLong")
+  override def visit(n: LongLiteralExpr, arg: Context): String = numberValue(n.getValue, "java.lang.Long.parseLong")
 
   private def removeUnderscores(n: String) = n.replaceAllLiterally("_", "")
   
@@ -531,29 +530,29 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     }
   }
 
-  def visit(n: IntegerLiteralMinValueExpr, arg: Context): String = n.getValue
+  override def visit(n: IntegerLiteralMinValueExpr, arg: Context): String = n.getValue
 
-  def visit(n: LongLiteralMinValueExpr, arg: Context): String = n.getValue
+  override def visit(n: LongLiteralMinValueExpr, arg: Context): String = n.getValue
 
-  def visit(n: StringLiteralExpr, arg: Context): String = s""""${n.getValue}""""
+  override def visit(n: StringLiteralExpr, arg: Context): String = s""""${n.getValue}""""
 
-  def visit(n: BooleanLiteralExpr, arg: Context): String = String.valueOf(n.getValue)
+  override def visit(n: BooleanLiteralExpr, arg: Context): String = String.valueOf(n.getValue)
 
-  def visit(n: NullLiteralExpr, arg: Context): String = "null"
+  override def visit(n: NullLiteralExpr, arg: Context): String = "null"
 
-  def visit(n: ThisExpr, arg: Context): String = withComments(n, arg) {
+  override def visit(n: ThisExpr, arg: Context): String = withComments(n, arg) {
     Option(n.getClassExpr).map { classExpr =>
       s"${classExpr.accept(this, arg)}."
     }.getOrElse("") + "this"
   }
 
-  def visit(n: SuperExpr, arg: Context): String = withComments(n, arg) {
+  override def visit(n: SuperExpr, arg: Context): String = withComments(n, arg) {
     Option(n.getClassExpr).map { classExpr =>
       s"${classExpr.accept(this, arg)}."
     }.getOrElse("") + "super"
   }
 
-  def visit(n: MethodCallExpr, arg: Context): String = withComments(n, arg) {
+  override def visit(n: MethodCallExpr, arg: Context): String = withComments(n, arg) {
     val args = if (n.getArgs == null) 0 else n.getArgs.size
     val shortForm = SHORT_FORM.contains(n.getName) && args < 2 && !n.getArgs.get(0).isInstanceOf[LiteralExpr] || NO_ARGS_SHORT.contains(n.getName) && args == 0
     val scopeString = Option(n.getScope).map { scope =>
@@ -582,7 +581,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
       argsString
   }
 
-  def visit(n: ObjectCreationExpr, arg: Context): String = withComments(n, arg) {
+  override def visit(n: ObjectCreationExpr, arg: Context): String = withComments(n, arg) {
     Option(n.getScope).map(_.accept(this, arg) + ".").getOrElse("") +
       "new " +
       typeArgsString(n.getTypeArgs, arg) +
@@ -593,8 +592,8 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
       }.mkString
   }
 
-  def visit(n: UnaryExpr, arg: Context): String = withComments(n, arg) {
-    import UnaryExpr.{ Operator => Op }
+  override def visit(n: UnaryExpr, arg: Context): String = withComments(n, arg) {
+    import UnaryExpr.{Operator => Op}
     if (n.getOperator == Op.not && n.getExpr.isInstanceOf[MethodCallExpr] && n.getExpr.asInstanceOf[MethodCallExpr].getName == "equals") {
       val method = n.getExpr.asInstanceOf[MethodCallExpr]
       return new MethodCallExpr(method.getScope, "!=", method.getArgs).accept(this, arg)
@@ -611,7 +610,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
       case _ => ""
     }
   }
-  def visit(n: ConstructorDeclaration, arg: Context): String = printConstructor(n, arg, false)
+  override def visit(n: ConstructorDeclaration, arg: Context): String = printConstructor(n, arg, false)
 
   private def printConstructor(n: ConstructorDeclaration, arg: Context, first: Boolean): String = withComments(n, arg) {
     val annotationString = memberAnnotationsString(n.getAnnotations, arg)
@@ -634,7 +633,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
         paramsString
     }
   }
-  def visit(n: MethodDeclaration, arg: Context): String = {
+  override def visit(n: MethodDeclaration, arg: Context): String = {
     val argWithInCopyEquals = arg.copy(inObjectEquals = n.getName == "equals" && n.getParameters.size == 1)
     withComments(n, argWithInCopyEquals) {
       val annotationSource = memberAnnotationsString(n.getAnnotations, argWithInCopyEquals)
@@ -656,7 +655,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     }
   }
 
-  def visit(n: Parameter, arg: Context): String = withAnnotations(n, arg) {
+  override def visit(n: Parameter, arg: Context): String = withAnnotations(n, arg) {
     val valVarString = if (n.getModifiers.isProperty) {
       if (n.getModifiers.isFinal) "val " else "var "
     } else ""
@@ -678,7 +677,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
       typeDeclarationString
   }
 
-  def visit(n: MultiTypeParameter, arg: Context): String = withAnnotations(n, arg) {
+  override def visit(n: MultiTypeParameter, arg: Context): String = withAnnotations(n, arg) {
     val valVarString = if (n.getModifiers.isProperty) {
       if (n.getModifiers.isFinal) "val " else "var "
     } else ""
@@ -693,7 +692,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
       })
   }
 
-  def visit(n: ExplicitConstructorInvocationStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: ExplicitConstructorInvocationStmt, arg: Context): String = withComments(n, arg) {
     if (n.isThis) {
       typeArgsString(n.getTypeArgs, arg) + "this" + argumentsString(n.getArgs, arg)
     } else {
@@ -731,7 +730,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     }
   }
 
-  def visit(n: VariableDeclarationExpr, arg: Context): String = withComments(n, arg) {
+  override def visit(n: VariableDeclarationExpr, arg: Context): String = withComments(n, arg) {
     val asParameter = n.getModifiers == -1
     val valVarString = if (ModifierSet.isFinal(n.getModifiers)) "val " else "var "
     n.getVars.map { v =>
@@ -769,17 +768,17 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     }.mkString("\n")
   }
 
-  def visit(n: TypeDeclarationStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: TypeDeclarationStmt, arg: Context): String = withComments(n, arg) {
     n.getTypeDeclaration.accept(this, arg)
   }
 
-  def visit(n: AssertStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: AssertStmt, arg: Context): String = withComments(n, arg) {
     s"assert(${n.getCheck.accept(this, arg)})" + Option(n.getMessage).map { msg =>
       s" : ${msg.accept(this, arg)}"
     }.getOrElse("")
   }
 
-  def visit(n: BlockStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: BlockStmt, arg: Context): String = withComments(n, arg) {
     if (!isEmpty(n.getStmts) && !arg.mustWrap && n.getStmts.size == 1 && n.getStmts.get(0).isInstanceOf[SwitchStmt]) {
       return n.getStmts.get(0).accept(this, arg)
     } else if (!isEmpty(n.getStmts) && !arg.mustWrap && n.getStmts.size == 1) {
@@ -802,18 +801,18 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     }.getOrElse("")
   }
 
-  def visit(n: LabeledStmt, arg: Context): String =
+  override def visit(n: LabeledStmt, arg: Context): String =
     s"${n.getLabel}: ${n.getStmt.accept(this, arg)}"
 
-  def visit(n: EmptyStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: EmptyStmt, arg: Context): String = withComments(n, arg) {
     ""
   }
 
-  def visit(n: ExpressionStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: ExpressionStmt, arg: Context): String = withComments(n, arg) {
     n.getExpression.accept(this, arg)
   }
 
-  def visit(n: SwitchStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: SwitchStmt, arg: Context): String = withComments(n, arg) {
     val argNoSkip = arg.copy(skip = false)
     n.getSelector.accept(this, argNoSkip) + " match {\n" +
       Option(n.getEntries).map { entries =>
@@ -823,7 +822,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
       "\n}"
   }
 
-  def visit(n: SwitchEntryStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: SwitchEntryStmt, arg: Context): String = withComments(n, arg) {
     val matchExpr = if (arg.skip) {
       " | " + Option(n.getLabel).map(_.accept(this, arg)).getOrElse("")
     } else {
@@ -843,11 +842,11 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     matchExpr + resultExpr
   }
 
-  def visit(n: BreakStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: BreakStmt, arg: Context): String = withComments(n, arg) {
     "//break"
   }
 
-  def visit(n: ReturnStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: ReturnStmt, arg: Context): String = withComments(n, arg) {
     Option(n.getExpr).map { expr =>
       (if (arg.returnOn) {
         "return "
@@ -856,7 +855,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     }.getOrElse("return")
   }
 
-  def visit(n: EnumDeclaration, arg: Context): String = withJavaDoc(n, arg) {
+  override def visit(n: EnumDeclaration, arg: Context): String = withJavaDoc(n, arg) {
     val implementsString = Option(n.getImplements).map { impl =>
       " implements " + impl.map(_.accept(this, arg)).mkString(", ")
     }.getOrElse("")
@@ -875,7 +874,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
       "}"
   }
 
-  def visit(n: EnumConstantDeclaration, arg: Context): String = withJavaDoc(n, arg) {
+  override def visit(n: EnumConstantDeclaration, arg: Context): String = withJavaDoc(n, arg) {
     memberAnnotationsString(n.getAnnotations, arg) +
       n.getName +
       Option(n.getArgs).map(args => argumentsString(args, arg)).getOrElse("") +
@@ -884,9 +883,9 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
       }.getOrElse("")
   }
 
-  def visit(n: EmptyMemberDeclaration, arg: Context): String = withJavaDoc(n, arg)()
+  override def visit(n: EmptyMemberDeclaration, arg: Context): String = withJavaDoc(n, arg)()
 
-  def visit(n: InitializerDeclaration, arg: Context): String = withComments(n, arg) {
+  override def visit(n: InitializerDeclaration, arg: Context): String = withComments(n, arg) {
     Option(n.getBlock.getStmts).map { stmts =>
       stmts.flatMap {
         case _: ExplicitConstructorInvocationStmt => None
@@ -895,24 +894,24 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     }.getOrElse("")
   }
 
-  def visit(n: IfStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: IfStmt, arg: Context): String = withComments(n, arg) {
     s"if (${n.getCondition.accept(this, arg)}) ${n.getThenStmt.accept(this, arg.copy(mustWrap = true))}" +
       Option(n.getElseStmt).map { elStmt => s" else ${elStmt.accept(this, arg.copy(mustWrap = true))}" }.getOrElse("")
   }
 
-  def visit(n: WhileStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: WhileStmt, arg: Context): String = withComments(n, arg) {
     s"while (${n.getCondition.accept(this, arg)}) ${n.getBody.accept(this, arg)}"
   }
 
-  def visit(n: ContinueStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: ContinueStmt, arg: Context): String = withComments(n, arg) {
     "//continue"
   }
 
-  def visit(n: DoStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: DoStmt, arg: Context): String = withComments(n, arg) {
     s"do ${n.getBody.accept(this, arg)} while (${n.getCondition.accept(this, arg)});"
   }
 
-  def visit(n: ForeachStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: ForeachStmt, arg: Context): String = withComments(n, arg) {
     val forExpressionDescent = Iterator.iterate((n: Statement, "", 0)) { case (bdy, _, idx) =>
       bdy match {
         case MaybeInBlock(fe: ForeachStmt) =>
@@ -946,7 +945,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     case _ => false
   }
 
-  def visit(n: ForStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: ForStmt, arg: Context): String = withComments(n, arg) {
     val loopCondition = Option(n.getCompare).map(_.accept(this, arg)).getOrElse("true")
     val body = if (n.getUpdate != null && n.getBody.isInstanceOf[BlockStmt]) {
       // merge updates into block
@@ -968,17 +967,17 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
       body
   }
 
-  def visit(n: ThrowStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: ThrowStmt, arg: Context): String = withComments(n, arg) {
     "throw " + n.getExpr.accept(this, arg)
   }
 
-  def visit(n: SynchronizedStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: SynchronizedStmt, arg: Context): String = withComments(n, arg) {
     Option(n.getExpr).map(expr => s"synchronized (${expr.accept(this, arg.copy(mustWrap = true))}) ")
       .getOrElse("synchronized ") +
       n.getBlock.accept(this, arg.copy(mustWrap = true))
   }
 
-  def visit(n: TryStmt, arg: Context): String = withComments(n, arg) {
+  override def visit(n: TryStmt, arg: Context): String = withComments(n, arg) {
     val wrapInTry = !isEmpty(n.getCatchs()) || n.getFinallyBlock() != null
 
     def resourceString(rd: VariableDeclarationExpr): String =
@@ -1014,7 +1013,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
       finallyString
   }
 
-  def visit(n: CatchClause, arg: Context): String = withComments(n, arg) {
+  override def visit(n: CatchClause, arg: Context): String = withComments(n, arg) {
     val catchBlockString = Option(n.getCatchBlock.getStmts).map { stmts =>
       if (stmts.size == 1) {
         stmts.get(0).accept(this, arg)
@@ -1026,7 +1025,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
     s"case ${n.getParam.accept(this, arg)} => $catchBlockString\n"
   }
 
-  def visit(n: AnnotationDeclaration, arg: Context): String = withJavaDoc(n, arg) {
+  override def visit(n: AnnotationDeclaration, arg: Context): String = withJavaDoc(n, arg) {
     memberAnnotationsString(n.getAnnotations, arg) +
       modifiersString(n.getModifiers) +
       "@interface " +
@@ -1036,7 +1035,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
       "}"
   }
 
-  def visit(n: AnnotationMemberDeclaration, arg: Context): String = withJavaDoc(n, arg) {
+  override def visit(n: AnnotationMemberDeclaration, arg: Context): String = withJavaDoc(n, arg) {
     memberAnnotationsString(n.getAnnotations, arg) +
       modifiersString(n.getModifiers) +
       visitName(n.getName) +
@@ -1045,39 +1044,39 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
       Option(n.getDefaultValue).map("= " + _.accept(this, arg)).toList.mkString
   }
 
-  def visit(n: MarkerAnnotationExpr, arg: Context): String = s"@${n.getName.accept(this, arg)}"
+  override def visit(n: MarkerAnnotationExpr, arg: Context): String = s"@${n.getName.accept(this, arg)}"
 
-  def visit(n: SingleMemberAnnotationExpr, arg: Context): String =
+  override def visit(n: SingleMemberAnnotationExpr, arg: Context): String =
     s"@${n.getName.accept(this, arg)}(${n.getMemberValue.accept(this, arg)})"
 
-  def visit(n: NormalAnnotationExpr, arg: Context): String = withComments(n, arg) {
+  override def visit(n: NormalAnnotationExpr, arg: Context): String = withComments(n, arg) {
     val pairsString = Option(n.getPairs).toList.flatten.map(_.accept(this, arg)).mkString("(", ", ", ")")
     s"@${n.getName.accept(this, arg)}$pairsString"
   }
 
-  def visit(n: MemberValuePair, arg: Context): String = s"${visitName(n.getName)} = ${n.getValue.accept(this, arg)}"
+  override def visit(n: MemberValuePair, arg: Context): String = s"${visitName(n.getName)} = ${n.getValue.accept(this, arg)}"
 
-  def visit(n: LineComment, arg: Context): String = s"//${n.getContent}"
+  override def visit(n: LineComment, arg: Context): String = s"//${n.getContent}"
 
-  def visit(n: BlockComment, arg: Context): String = s"/*${n.getContent}*/\n"
+  override def visit(n: BlockComment, arg: Context): String = s"/*${n.getContent}*/\n"
 
-  def visit(n: TypeExpr, arg: Context): String = n.getType.accept(this, arg)
+  override def visit(n: TypeExpr, arg: Context): String = n.getType.accept(this, arg)
 
-  def visit(n: MethodReferenceExpr, arg: Context): String = withComments(n, arg) {
+  override def visit(n: MethodReferenceExpr, arg: Context): String = withComments(n, arg) {
     val typeParams = if (n.getTypeArguments.getTypeArguments.isEmpty()) ""
                      else n.getTypeArguments.getTypeArguments.map(_.accept(this, arg)).mkString("[", ", ", "]")
     s"${n.getScope.accept(this, arg)}.${visitName(n.getIdentifier)}$typeParams"
   }
 
-  def visit(n: LambdaExpr, arg: Context): String = withComments(n, arg) {
+  override def visit(n: LambdaExpr, arg: Context): String = withComments(n, arg) {
     val params = n.getParameters.map(_.accept(this, arg)).mkString("(", ", ", ")")
     val body = n.getBody.accept(this, arg)
     s"${params} => $body"
   }
 
-  def visit(n: UnknownType, y: Context): String = s"Nothing /* Unknown type $n */"
+  override def visit(n: UnknownType, y: Context): String = s"Nothing /* Unknown type $n */"
 
-  def visit(n: UnionType, y: Context): String = n.getElements.map("_: " + _.accept(this, y)).mkString("(", " | ", ")")
+  override def visit(n: UnionType, y: Context): String = n.getElements.map("_: " + _.accept(this, y)).mkString("(", " | ", ")")
 
-  def visit(n: IntersectionType, y: Context): String = s"Nothing /* Intersection type $n */"
+  override def visit(n: IntersectionType, y: Context): String = s"Nothing /* Intersection type $n */"
 }

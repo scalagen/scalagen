@@ -6,6 +6,8 @@ name := "scalagen-root"
 
 lazy val sclVersions = List("2.12.11")
 
+scalacOptions in ThisBuild ++= Seq("-feature", "-deprecation")
+
 scalaVersion in ThisBuild := sclVersions.head
 
 lazy val scalagen = project

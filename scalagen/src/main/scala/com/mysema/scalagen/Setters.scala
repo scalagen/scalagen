@@ -13,10 +13,7 @@
  */
 package com.mysema.scalagen
 
-import com.github.javaparser.ast.visitor._
-import java.util.ArrayList
-import UnitTransformer._
-import com.mysema.scalagen.ast.BeginClosureExpr
+import com.mysema.scalagen.UnitTransformer._
 
 object Setters extends Setters
 

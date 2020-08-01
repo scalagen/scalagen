@@ -15,7 +15,7 @@ package com.mysema.scalagen
 
 import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.expr.NameExpr
-import UnitTransformer._
+import com.mysema.scalagen.UnitTransformer._
 
 /**
  * Annotations turns Annotation type declarations into normal classes which extend

@@ -13,21 +13,16 @@
  */
 package com.mysema.scalagen 
 
-import java.io.File
-import java.io.FileInputStream
-import java.io.{IOException, File}
-import org.junit._
 import com.github.javaparser.JavaParser
 import com.mysema.scala.CompileTestUtils
-import org.junit.Assert._
+import com.mysema.scalagen.TestDirectoryStructure._
+import java.io.{File, FileInputStream}
+import org.junit._
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 import org.junit.runners.Parameterized.Parameters
-import TestDirectoryStructure._
-import scala.tools.nsc.Settings
-
 import scala.collection.JavaConverters._
-import ScalaCompilationTest._
+import scala.tools.nsc.Settings
 object ScalaCompilationTest {
 
   @Parameters

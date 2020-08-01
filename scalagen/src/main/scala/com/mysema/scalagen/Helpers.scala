@@ -13,14 +13,16 @@
  */
 package com.mysema.scalagen
 
-import java.lang.reflect.Modifier
 import com.github.javaparser.ast.body.ModifierSet
+import java.lang.reflect.Modifier
 import java.util.ArrayList
 
 /**
  * Common helper methods for transformers and ScalaDumpVisitor
  */
 trait Helpers {
+  import scala.language.implicitConversions
+  import scala.language.reflectiveCalls
   import Types._
   
   val PRIVATE = Modifier.PRIVATE
