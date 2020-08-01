@@ -14,8 +14,8 @@
 package com.mysema.scalagen
 
 import com.github.javaparser.ast.CompilationUnit
-import UnitTransformer._
 import com.github.javaparser.ast.body.ModifierSet
+import com.mysema.scalagen.UnitTransformer._
 
 object Synchronized extends Synchronized
 

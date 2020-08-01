@@ -13,9 +13,7 @@
  */
 package com.mysema.scalagen
 
-import java.util.ArrayList
-import UnitTransformer._
-import com.github.javaparser.ast.expr._
+import com.mysema.scalagen.UnitTransformer._
 
 object Primitives extends Primitives
 

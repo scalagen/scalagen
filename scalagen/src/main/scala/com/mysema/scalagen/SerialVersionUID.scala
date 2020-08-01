@@ -13,9 +13,8 @@
  */
 package com.mysema.scalagen
 
-import java.util.ArrayList
 import com.github.javaparser.ast.CompilationUnit
-import UnitTransformer._
+import com.mysema.scalagen.UnitTransformer._
 
 object SerialVersionUID extends SerialVersionUID
 

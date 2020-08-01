@@ -14,9 +14,9 @@
 package com.mysema.scalagen
 
 import com.github.javaparser.ast.CompilationUnit
-import UnitTransformer._
-import defs._
 import com.github.javaparser.ast.body.ModifierSet
+import com.mysema.scalagen.UnitTransformer._
+import com.mysema.scalagen.defs._
 
 object VarToVal extends VarToVal
 

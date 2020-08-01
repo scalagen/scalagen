@@ -14,7 +14,7 @@
 package com.mysema.scalagen
 
 import com.github.javaparser.ast.CompilationUnit
-import UnitTransformer._
+import com.mysema.scalagen.UnitTransformer._
 
 object Underscores extends Underscores
 

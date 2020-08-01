@@ -13,18 +13,9 @@
  */
 package com.mysema.scalagen
 
-import com.github.javaparser.JavaParser
-import com.github.javaparser.ParseException
-import com.github.javaparser.ast.CompilationUnit
+import com.mysema.scalagen.TestDirectoryStructure._
 import java.io.File
-import java.io.FileInputStream
-import java.io.IOException
-import java.util.ArrayList
-import java.util.Arrays
-import java.util.List
-import org.apache.commons.io.FileUtils
 import org.junit.Test
-import TestDirectoryStructure._
 
 class ScalaDumpVisitorTest extends AbstractParserTest {
 

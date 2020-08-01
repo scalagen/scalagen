@@ -14,7 +14,7 @@
 package com.mysema.scalagen
 
 import com.mysema.scala.BeanUtils
-import Types._
+import com.mysema.scalagen.Types._
 
 /**
  * 

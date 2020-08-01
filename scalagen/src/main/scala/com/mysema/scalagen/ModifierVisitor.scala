@@ -1,19 +1,14 @@
 package com.mysema.scalagen
 
-import com.github.javaparser.ast.CompilationUnit
-import com.github.javaparser.ast.DocumentableNode
-import com.github.javaparser.ast.ImportDeclaration
-import com.github.javaparser.ast.Node
-import com.github.javaparser.ast.PackageDeclaration
-import com.github.javaparser.ast.TypeParameter
+import com.github.javaparser.ast._
+import com.github.javaparser.ast.`type`._
 import com.github.javaparser.ast.body._
 import com.github.javaparser.ast.comments._
 import com.github.javaparser.ast.expr._
 import com.github.javaparser.ast.stmt._
-import com.github.javaparser.ast.`type`._
 import com.github.javaparser.ast.visitor.GenericVisitor
-import java.util.{ArrayList, Collections}
 import com.mysema.scalagen.ast.BeginClosureExpr
+import java.util.{ArrayList, Collections}
 
 /**
  * 

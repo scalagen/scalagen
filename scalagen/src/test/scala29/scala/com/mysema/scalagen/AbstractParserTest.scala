@@ -14,13 +14,9 @@
 package com.mysema.scalagen
 
 import com.github.javaparser.JavaParser
-import com.github.javaparser.ParseException
 import com.github.javaparser.ast.{CompilationUnit, ImportDeclaration}
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileNotFoundException
+import java.io.{File, FileInputStream}
 import java.util.ArrayList
-import scala.collection.JavaConversions._
 
 abstract class AbstractParserTest {
   

@@ -13,10 +13,10 @@
  */
 package com.mysema.scalagen
 
+import com.mysema.scalagen.TestDirectoryStructure._
 import java.io.File
-import org.junit.Test
 import org.junit.Assert._
-import TestDirectoryStructure._
+import org.junit.Test
 
 class ConverterTest extends AbstractParserTest {
   

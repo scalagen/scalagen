@@ -13,11 +13,7 @@
  */
 package com.mysema
 
-import com.github.javaparser.ast.body._
-import com.github.javaparser.ast.expr._
-import com.github.javaparser.ast.stmt._
-import _root_.scala.collection.JavaConversions
-import _root_.scala.collection.Set
+import _root_.scala.collection.{JavaConversions, Set}
 
 /**
  * scalagen provides common functionality for this package

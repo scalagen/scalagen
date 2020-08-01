@@ -13,8 +13,8 @@
  */
 package com.mysema.scalagen
 
+import com.mysema.scalagen.UnitTransformer._
 import java.util.ArrayList
-import UnitTransformer._
 
 object Constructors extends Constructors
 

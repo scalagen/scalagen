@@ -13,8 +13,8 @@
  */
 package com.mysema.scalagen 
 
-import com.github.javaparser.ast.expr._
 import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.ast.expr._
 
 object UnitTransformer extends Helpers with Types {
   

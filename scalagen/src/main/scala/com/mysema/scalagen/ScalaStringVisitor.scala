@@ -14,19 +14,18 @@
 package com.mysema.scalagen
 
 import com.github.javaparser.ast._
+import com.github.javaparser.ast.`type`._
 import com.github.javaparser.ast.body._
 import com.github.javaparser.ast.comments._
 import com.github.javaparser.ast.expr._
 import com.github.javaparser.ast.stmt._
-import com.github.javaparser.ast.`type`._
 import com.github.javaparser.ast.visitor.{GenericVisitor, GenericVisitorAdapter}
-import java.util.List
-
 import com.mysema.scalagen.Types.MaybeInBlock
-
-import scala.collection.JavaConverters._
-import org.apache.commons.lang3.StringUtils
 import com.mysema.scalagen.ast.BeginClosureExpr
+import java.util.List
+import org.apache.commons.lang3.StringUtils
+import scala.collection.JavaConverters._
+
 object ScalaStringVisitor {
   private val PARAMETRIZED = Set("Class","Comparable","Enum","Iterable")
 
@@ -430,7 +429,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
   }
 
   def visit(n: AssignExpr, arg: Context): String = withComments(n, arg) {
-    import AssignExpr.{ Operator => Op }
+    import AssignExpr.{Operator => Op}
     val symbol = n.getOperator match {
       case Op.assign => "="
       case Op.and => "&="
@@ -449,7 +448,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
   }
 
   def visit(n: BinaryExpr, arg: Context): String = withComments(n, arg) {
-    import BinaryExpr.{ Operator => Op }
+    import BinaryExpr.{Operator => Op}
     val symbol = n.getOperator match {
       case Op.or => "||"
       case Op.and => "&&"
@@ -594,7 +593,7 @@ class ScalaStringVisitor(settings: ConversionSettings) extends GenericVisitor[St
   }
 
   def visit(n: UnaryExpr, arg: Context): String = withComments(n, arg) {
-    import UnaryExpr.{ Operator => Op }
+    import UnaryExpr.{Operator => Op}
     if (n.getOperator == Op.not && n.getExpr.isInstanceOf[MethodCallExpr] && n.getExpr.asInstanceOf[MethodCallExpr].getName == "equals") {
       val method = n.getExpr.asInstanceOf[MethodCallExpr]
       return new MethodCallExpr(method.getScope, "!=", method.getArgs).accept(this, arg)

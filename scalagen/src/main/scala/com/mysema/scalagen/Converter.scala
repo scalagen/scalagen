@@ -13,14 +13,11 @@
  */
 package com.mysema.scalagen
 
-import java.io.{File, ByteArrayInputStream}
 import com.github.javaparser.JavaParser
-import com.github.javaparser.ast.{ImportDeclaration, CompilationUnit}
-import org.apache.commons.io.FileUtils
+import com.github.javaparser.ast.{CompilationUnit, ImportDeclaration}
+import java.io.{ByteArrayInputStream, File}
 import java.util.ArrayList
-import com.github.javaparser.ParseException
-import java.io.ByteArrayInputStream
-import java.util.regex.Pattern
+import org.apache.commons.io.FileUtils
 
 object Converter {
   

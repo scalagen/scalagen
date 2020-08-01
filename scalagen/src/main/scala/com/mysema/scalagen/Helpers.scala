@@ -13,8 +13,8 @@
  */
 package com.mysema.scalagen
 
-import java.lang.reflect.Modifier
 import com.github.javaparser.ast.body.ModifierSet
+import java.lang.reflect.Modifier
 import java.util.ArrayList
 
 /**

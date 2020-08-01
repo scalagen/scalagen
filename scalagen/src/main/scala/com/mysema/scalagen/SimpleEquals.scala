@@ -13,9 +13,7 @@
  */
 package com.mysema.scalagen
 
-import com.github.javaparser.ast.visitor.ModifierVisitorAdapter
-import UnitTransformer._
-import java.util.ArrayList
+import com.mysema.scalagen.UnitTransformer._
 
 object SimpleEquals extends SimpleEquals
 
